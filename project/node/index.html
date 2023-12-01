@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<title>채팅 프로젝트</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font: 13px Helvetica, Arial; }
+  form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+  form input { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
+  form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+  #chatLog { list-style-type: none; margin: 0; padding: 0; }
+  #chatLog li { padding: 5px 10px; }
+  #chatLog li:nth-child(odd) { background: #eee; }
+</style>
+</head>
+<body>
+  <ul id="chatLog"></ul>
+    <form action="" id="sendForm">
+        <input name="message" autocomplete="off" /><button>전송</button>
+    </form>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>    
+  <script src="/socket.io/socket.io.js"></script>  
+  <script>
+  //1. 소켓서버 접속
+  let socket = io();
+
+
+  //3. server message로 받아서 받는 사람 뿌리기
+  socket.on('server message', function(data){
+        console.log("11111111111",data);
+    $('#chatLog').append('<li> '+ data.username +' : ' + data.message + ' </li>');
+  });
+
+  socket.on('join', function(data){
+    console.log("222222222",data);
+    $('#chatLog').append('<li> ' + data.username + '님이 방을 들어왔습니다 </li>');
+  });
+
+  socket.on('leave', function(data){
+    console.log("333333333",data);
+    $('#chatLog').append('<li> ' + data.username + '님이 방을 나갔습니다 </li>');
+  });
+
+  //2. client message라는 이름으로 서버에 보내는 데이터
+  $(document).ready(function(){
+    $('#sendForm').submit(function(){
+      let message = $('#sendForm input[name=message]');
+      socket.emit('client message', { message : message.val()});
+      message.val('');
+      return false;
+  });
+});
+  </script>
+</body>
+</html>
